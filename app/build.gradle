@@ -55,6 +55,7 @@ dependencies {
     implementation libs.composeMaterial3
     implementation(project(":android-initializable"))
     implementation(project(":logger"))
+    implementation(project(":currency-persistence"))
 
     debugImplementation libs.composeUiToolingDebug
     debugImplementation libs.composeUiTestManifestDebug

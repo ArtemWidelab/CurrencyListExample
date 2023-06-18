@@ -17,3 +17,5 @@ include ':app'
 includeBuild 'build-logic'
 include(":android-initializable")
 include(":logger")
+include(":currency-entities")
+include(':currency-persistence')
