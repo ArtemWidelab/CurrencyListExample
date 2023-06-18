@@ -1,16 +1,12 @@
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
+    id("android-app-convention")
 }
 
 android {
     namespace 'ua.widelab.currencylistexample'
-    compileSdk 33
 
     defaultConfig {
         applicationId "ua.widelab.currencylistexample"
-        minSdk 21
-        targetSdk 33
         versionCode 1
         versionName "1.0"
 
