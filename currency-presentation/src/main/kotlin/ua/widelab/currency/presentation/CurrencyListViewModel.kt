@@ -32,7 +32,8 @@ class CurrencyListViewModel @Inject constructor(
         val currencies: ImmutableList<Currency> = persistentListOf(),
         val exchangeWithCurrencies: ImmutableList<ExchangeWithCurrency> = persistentListOf(),
         val loadingError: Throwable? = null,
-        val newPairState: NewPairState? = null
+        val newPairState: NewPairState? = null,
+        val selectCurrencyState: SelectCurrencyState = SelectCurrencyState.HIDDEN
     ) {
         companion object {
             val State.isBlockingLoading: Boolean
@@ -44,6 +45,12 @@ class CurrencyListViewModel @Inject constructor(
         val from: Currency,
         val to: Currency
     )
+
+    enum class SelectCurrencyState {
+        HIDDEN,
+        FROM,
+        TO
+    }
 
     private val mutableStateFlow by lazy { MutableStateFlow(State()) }
     val stateFlow: StateFlow<State> = mutableStateFlow.asStateFlow()
@@ -126,6 +133,52 @@ class CurrencyListViewModel @Inject constructor(
                     fromCurrency = exchangeWithCurrency.fromCurrency.toRepoModel(),
                     toCurrency = exchangeWithCurrency.toCurrency.toRepoModel()
                 )
+            )
+        }
+    }
+
+    fun setNewPairCurrency(currency: Currency) {
+        mutableStateFlow.update {
+            when (it.selectCurrencyState) {
+                SelectCurrencyState.HIDDEN -> it
+                SelectCurrencyState.FROM -> it.copy(
+                    newPairState = it.newPairState?.copy(
+                        from = currency
+                    ),
+                    selectCurrencyState = SelectCurrencyState.HIDDEN
+                )
+
+                SelectCurrencyState.TO -> it.copy(
+                    newPairState = it.newPairState?.copy(
+                        to = currency
+                    ),
+                    selectCurrencyState = SelectCurrencyState.HIDDEN
+                )
+            }
+
+        }
+    }
+
+    fun dismissCurrencySelection() {
+        mutableStateFlow.update {
+            it.copy(
+                selectCurrencyState = SelectCurrencyState.HIDDEN
+            )
+        }
+    }
+
+    fun selectNewPairFrom() {
+        mutableStateFlow.update {
+            it.copy(
+                selectCurrencyState = SelectCurrencyState.FROM
+            )
+        }
+    }
+
+    fun selectNewPairTo() {
+        mutableStateFlow.update {
+            it.copy(
+                selectCurrencyState = SelectCurrencyState.TO
             )
         }
     }

@@ -2,6 +2,7 @@
 
 package ua.widelab.currency.presentation.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,8 +36,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.widelab.compose.components.SimpleAppBar
@@ -54,7 +59,11 @@ fun CurrencyListScreen(
     CurrencyListScreen(
         state,
         viewModel::addNewPair,
-        viewModel::delete
+        viewModel::delete,
+        viewModel::setNewPairCurrency,
+        viewModel::dismissCurrencySelection,
+        viewModel::selectNewPairFrom,
+        viewModel::selectNewPairTo
     )
 }
 
@@ -62,14 +71,17 @@ fun CurrencyListScreen(
 fun CurrencyListScreen(
     state: CurrencyListViewModel.State,
     addNewPair: () -> Unit,
-    delete: (ExchangeWithCurrency) -> Unit
+    delete: (ExchangeWithCurrency) -> Unit,
+    setNewPairValue: (Currency) -> Unit,
+    dismissCurrencySelection: () -> Unit,
+    selectNewPairFrom: () -> Unit,
+    selectNewPairTo: () -> Unit,
 ) {
     if (state.isBlockingLoading) {
         CurrencyListLoading()
         return
     }
     val lazyListState = rememberLazyListState()
-
     Scaffold(
         topBar = {
             SimpleAppBar(
@@ -97,7 +109,39 @@ fun CurrencyListScreen(
                 item {
                     NewPairItem(
                         newPairState = it,
-                        add = addNewPair
+                        add = addNewPair,
+                        selectNewPairFrom = selectNewPairFrom,
+                        selectNewPairTo = selectNewPairTo
+                    )
+                }
+            }
+        }
+    }
+    val configuration = LocalConfiguration.current
+    DropdownMenu(
+        expanded = state.selectCurrencyState != CurrencyListViewModel.SelectCurrencyState.HIDDEN,
+        onDismissRequest = dismissCurrencySelection,
+        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+        offset = DpOffset(
+            x = configuration.screenWidthDp.times(0.1).dp,
+            y = configuration.screenHeightDp.times(0.1).dp
+        )
+    ) {
+        Box(
+            modifier = Modifier.size(
+                width = configuration.screenWidthDp.times(0.8).dp,
+                height = configuration.screenHeightDp.times(0.8).dp
+            )
+        ) {
+            LazyColumn {
+                items(state.currencies) { currency ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = currency.name)
+                        },
+                        onClick = {
+                            setNewPairValue(currency)
+                        },
                     )
                 }
             }
@@ -174,7 +218,9 @@ fun ExchangeItem(
 @Composable
 fun NewPairItem(
     newPairState: CurrencyListViewModel.NewPairState,
-    add: () -> Unit
+    add: () -> Unit,
+    selectNewPairFrom: () -> Unit,
+    selectNewPairTo: () -> Unit,
 ) {
     ItemCard(onClick = { /*TODO*/ }) {
         Text(
@@ -193,7 +239,8 @@ fun NewPairItem(
             ) {
                 CurrencyChip(
                     modifier = Modifier.weight(1f),
-                    currency = newPairState.from
+                    currency = newPairState.from,
+                    onClick = selectNewPairFrom
                 )
                 Text(
                     style = MaterialTheme.typography.headlineSmall,
@@ -201,7 +248,8 @@ fun NewPairItem(
                 )
                 CurrencyChip(
                     modifier = Modifier.weight(1f),
-                    currency = newPairState.to
+                    currency = newPairState.to,
+                    onClick = selectNewPairTo
                 )
             }
             IconButton(
@@ -219,11 +267,11 @@ fun NewPairItem(
 }
 
 @Composable
-fun CurrencyChip(modifier: Modifier, currency: Currency) {
+fun CurrencyChip(modifier: Modifier, currency: Currency, onClick: () -> Unit) {
     InputChip(
         modifier = modifier,
         selected = false,
-        onClick = { /*TODO*/ },
+        onClick = onClick,
         label = {
             Text(
                 modifier = Modifier
