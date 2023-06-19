@@ -13,6 +13,8 @@ interface CurrencyPersistenceDataSource {
     suspend fun addCurrencyPair(currencyPair: CurrencyPair): Result<Unit, AddCurrencyPairThrowable>
     suspend fun deleteCurrencyPair(from: Currency, to: Currency)
     fun getCurrencyPairsWithRates(): Flow<List<ExchangeWithCurrency>>
+    fun getCurrencyPairs(): Flow<List<CurrencyPair>>
+    fun getCurrencyRate(from: Currency, to: Currency): Flow<Exchange?>
     suspend fun addExchangeRate(
         from: Currency,
         to: Currency,

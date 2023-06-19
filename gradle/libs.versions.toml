@@ -4,6 +4,7 @@ composeKotlinCompiler = "1.4.0"
 androidLifecycle = { strictly = "2.6.1" }
 hilt = { strictly = "2.44" }
 room = { strictly = "2.5.1" }
+dataStore = { strictly = "1.0.0" }
 
 [libraries]
 androidCore = { module = "androidx.core:core-ktx", version.strictly = "1.10.1" }
@@ -22,6 +23,7 @@ result = { module = "com.github.kittinunf.result:result-jvm", version.strictly =
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.strictly = "2.9.0" }
 retrofitKotlinxSerialization = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.strictly = "1.0.0" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.strictly = "1.5.1" }
+dataStorePreferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore" }
 
 composeUiToolingDebug = { module = "androidx.compose.ui:ui-tooling" }
 composeUiTestManifestDebug = { module = "androidx.compose.ui:ui-test-manifest" }

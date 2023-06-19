@@ -6,6 +6,7 @@ import androidx.room.MapInfo
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import ua.widelab.currency.entities.models.Exchange
 import ua.widelab.currency.persistence.models.entities.CurrencyEntity
 import ua.widelab.currency.persistence.models.entities.CurrencyID
 import ua.widelab.currency.persistence.models.entities.CurrencyPairEntity
@@ -49,6 +50,14 @@ internal interface CurrencyDao {
                 "GROUP BY currency_pairs.uid"
     )
     fun getCurrencyPairsWithRates(): Flow<Map<CurrencyPairValue, ExchangeRateEntity?>>
+
+    @Query(
+        "SELECT * FROM exchange_rate WHERE currencyPairId = :currencyPairId ORDER BY date DESC LIMIT 1"
+    )
+    fun getCurrencyRate(currencyPairId: Long): Flow<Exchange>
+
+    @Query("SELECT * FROM currency_pairs")
+    fun getCurrencyPairs(): Flow<List<CurrencyPairValue>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vararg rate: ExchangeRateEntity)

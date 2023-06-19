@@ -3,6 +3,8 @@ package ua.widelab.currency.persistence
 import com.github.kittinunf.result.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import ua.widelab.currency.entities.models.Currency
 import ua.widelab.currency.entities.models.CurrencyPair
@@ -12,6 +14,7 @@ import ua.widelab.currency.persistence.db.CurrencyDao
 import ua.widelab.currency.persistence.models.entities.CurrencyEntity
 import ua.widelab.currency.persistence.models.entities.CurrencyEntity.Companion.toCurrency
 import ua.widelab.currency.persistence.models.entities.CurrencyPairEntity
+import ua.widelab.currency.persistence.models.entities.CurrencyPairValue.Companion.toCurrencyPair
 import ua.widelab.currency.persistence.models.entities.ExchangeRateEntity
 import ua.widelab.currency.persistence.models.entities.ExchangeRateEntity.Companion.toExchange
 import javax.inject.Inject
@@ -61,6 +64,14 @@ internal class RoomCurrencyPersistenceDataSource @Inject constructor(
             }
     }
 
+    override fun getCurrencyPairs(): Flow<List<CurrencyPair>> {
+        return currencyDao.getCurrencyPairs().mapLatest {
+            it.map {
+                it.toCurrencyPair()
+            }
+        }
+    }
+
     override suspend fun addExchangeRate(
         from: Currency,
         to: Currency,
@@ -78,6 +89,20 @@ internal class RoomCurrencyPersistenceDataSource @Inject constructor(
             )
         )
         return Result.success(Unit)
+    }
+
+    override fun getCurrencyRate(from: Currency, to: Currency): Flow<Exchange?> {
+        return flowOf(CurrencyPair(fromCurrency = from, toCurrency = to))
+            .mapLatest {
+                currencyDao.getCurrencyPair(
+                    fromCurrencyID = it.fromCurrency.shortName,
+                    toCurrencyID = it.toCurrency.shortName
+                )
+            }
+            .flatMapLatest {
+                if (it == null) return@flatMapLatest flowOf(null)
+                currencyDao.getCurrencyRate(it.uid)
+            }
     }
 
 }

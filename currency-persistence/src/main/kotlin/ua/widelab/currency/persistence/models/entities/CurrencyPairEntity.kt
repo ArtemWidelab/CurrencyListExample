@@ -7,6 +7,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import ua.widelab.currency.entities.models.CurrencyPair
+import ua.widelab.currency.persistence.models.entities.CurrencyEntity.Companion.toCurrency
 
 @Entity(
     tableName = "currency_pairs",
@@ -58,4 +59,14 @@ internal data class CurrencyPairValue(
         entityColumn = "shortName"
     )
     val toCurrency: CurrencyEntity,
-)
+) {
+    companion object {
+        fun CurrencyPairValue.toCurrencyPair(): CurrencyPair {
+            return CurrencyPair(
+                fromCurrency = this.fromCurrency.toCurrency(),
+                toCurrency = this.toCurrency.toCurrency()
+            )
+        }
+    }
+
+}

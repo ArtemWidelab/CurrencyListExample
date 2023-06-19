@@ -7,7 +7,6 @@ import retrofit2.HttpException
 import retrofit2.Response
 import ua.widelab.currency.entities.models.Currency
 import ua.widelab.currency.entities.models.Exchange
-import ua.widelab.currency.entities.models.ExchangeWithCurrency
 import java.io.IOException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -51,28 +50,24 @@ internal class CurrencyApiDataSourceImpl @Inject constructor(
 
     override suspend fun getExchangeRate(
         from: Currency,
-        to: List<Currency>,
+        to: Currency,
         amount: BigDecimal
-    ): Result<List<ExchangeWithCurrency>, GetExchangeRateThrowable> {
+    ): Result<Exchange, GetExchangeRateThrowable> {
         return executeRequest {
             service.getRates(
                 from = from.shortName,
-                to = to.map { it.shortName }.joinToString(","),
+                to = to.shortName,
                 amount = amount.toPlainString()
             )
         }
             .map { response ->
                 response.rates.entries.map { entry ->
-                    ExchangeWithCurrency(
-                        exchange = Exchange(
-                            amount = amount,
-                            rate = entry.value,
-                            date = LocalDate.parse(response.date)
-                        ),
-                        fromCurrency = from,
-                        toCurrency = to.first { it.shortName == entry.key }
+                    Exchange(
+                        amount = amount,
+                        rate = entry.value,
+                        date = LocalDate.parse(response.date)
                     )
-                }
+                }.first()
             }
             .mapError {
                 GetExchangeRateThrowable.General(it)

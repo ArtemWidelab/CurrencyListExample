@@ -3,16 +3,16 @@ package ua.widelab.currency.api
 import com.github.kittinunf.result.Result
 import ua.widelab.app_network.findCause
 import ua.widelab.currency.entities.models.Currency
-import ua.widelab.currency.entities.models.ExchangeWithCurrency
+import ua.widelab.currency.entities.models.Exchange
 import java.math.BigDecimal
 
 interface CurrencyApiDataSource {
     suspend fun getCurrencies(): Result<List<Currency>, GetCurrenciesThrowable>
     suspend fun getExchangeRate(
         from: Currency,
-        to: List<Currency>,
+        to: Currency,
         amount: BigDecimal
-    ): Result<List<ExchangeWithCurrency>, GetExchangeRateThrowable>
+    ): Result<Exchange, GetExchangeRateThrowable>
 }
 
 open class CurrencyApiThrowable(cause: Throwable) : Throwable(cause) {
