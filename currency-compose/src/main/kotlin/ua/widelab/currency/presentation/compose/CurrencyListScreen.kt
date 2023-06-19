@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,14 +53,16 @@ fun CurrencyListScreen(
     val state by viewModel.stateFlow.collectAsState()
     CurrencyListScreen(
         state,
-        viewModel::addNewPair
+        viewModel::addNewPair,
+        viewModel::delete
     )
 }
 
 @Composable
 fun CurrencyListScreen(
     state: CurrencyListViewModel.State,
-    addNewPair: () -> Unit
+    addNewPair: () -> Unit,
+    delete: (ExchangeWithCurrency) -> Unit
 ) {
     if (state.isBlockingLoading) {
         CurrencyListLoading()
@@ -84,7 +88,10 @@ fun CurrencyListScreen(
                 state.exchangeWithCurrencies,
                 key = { it.toText() }
             ) {
-                ExchangeItem(exchangeWithCurrency = it)
+                ExchangeItem(
+                    exchangeWithCurrency = it,
+                    delete = { delete(it) }
+                )
             }
             state.newPairState?.let {
                 item {
@@ -100,40 +107,67 @@ fun CurrencyListScreen(
 
 @Composable
 fun ItemCard(
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
         onClick = onClick
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             content()
         }
     }
 }
 
 @Composable
-fun ExchangeItem(exchangeWithCurrency: ExchangeWithCurrency) {
+fun ExchangeItem(
+    exchangeWithCurrency: ExchangeWithCurrency,
+    delete: () -> Unit
+) {
     ItemCard(
         onClick = { /*TODO*/ }
     ) {
-        Text(
-            style = MaterialTheme.typography.headlineSmall,
-            text = exchangeWithCurrency.toText()
-        )
-        val date = exchangeWithCurrency.exchange?.date
-        Text(
-            style = MaterialTheme.typography.bodySmall,
-            text = when {
-                date?.isEqual(LocalDate.now()) == true -> stringResource(id = R.string.updated_today)
-                date == null && exchangeWithCurrency.loading -> stringResource(id = R.string.updating)
-                date == null -> stringResource(id = R.string.fetch_exchange_rate_error)
-                else -> stringResource(id = R.string.last_updated, date.toString())
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    style = MaterialTheme.typography.headlineSmall,
+                    text = exchangeWithCurrency.toText()
+                )
+                val date = exchangeWithCurrency.exchange?.date
+                Text(
+                    style = MaterialTheme.typography.bodySmall,
+                    text = when {
+                        date?.isEqual(LocalDate.now()) == true -> stringResource(id = R.string.updated_today)
+                        date == null && exchangeWithCurrency.loading -> stringResource(id = R.string.updating)
+                        date == null -> stringResource(id = R.string.fetch_exchange_rate_error)
+                        else -> stringResource(id = R.string.last_updated, date.toString())
+                    }
+                )
             }
-        )
+            IconButton(
+                onClick = delete,
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentWidth(Alignment.End)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null
+                )
+            }
+        }
     }
 }
 

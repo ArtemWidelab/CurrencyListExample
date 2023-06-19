@@ -46,8 +46,8 @@ internal class RoomCurrencyPersistenceDataSource @Inject constructor(
 
     override suspend fun deleteCurrencyPair(from: Currency, to: Currency) {
         currencyDao.deleteCurrencyPair(
-            toCurrencyID = from.shortName,
-            fromCurrencyID = to.shortName
+            toCurrencyID = to.shortName,
+            fromCurrencyID = from.shortName
         )
     }
 

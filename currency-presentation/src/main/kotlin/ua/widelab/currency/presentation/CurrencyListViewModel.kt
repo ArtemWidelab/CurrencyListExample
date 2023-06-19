@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ua.widelab.currency.entities.models.CurrencyPair
 import ua.widelab.currency.presentation.models.Currency
 import ua.widelab.currency.presentation.models.Currency.Companion.toRepoModel
 import ua.widelab.currency.presentation.models.Exchange
@@ -115,6 +115,17 @@ class CurrencyListViewModel @Inject constructor(
             repo.addCurrencyPair(
                 from = pairState.from.toRepoModel(),
                 to = pairState.to.toRepoModel()
+            )
+        }
+    }
+
+    fun delete(exchangeWithCurrency: ExchangeWithCurrency) {
+        viewModelScope.launch {
+            repo.deleteCurrencyPair(
+                CurrencyPair(
+                    fromCurrency = exchangeWithCurrency.fromCurrency.toRepoModel(),
+                    toCurrency = exchangeWithCurrency.toCurrency.toRepoModel()
+                )
             )
         }
     }
