@@ -53,7 +53,7 @@ internal class RoomCurrencyPersistenceDataSource @Inject constructor(
             .mapLatest {
                 it.map {
                     ExchangeWithCurrency(
-                        exchangeEntity = it.value?.toExchange(),
+                        exchange = it.value?.toExchange(),
                         toCurrency = it.key.toCurrency.toCurrency(),
                         fromCurrency = it.key.fromCurrency.toCurrency()
                     )

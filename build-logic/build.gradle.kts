@@ -14,6 +14,7 @@ val libs = catalogs.named("libs")
 
 dependencies {
     api(libs.findLibrary("kotlinGradlePlugin").get())
+    api(libs.findLibrary("kotlinSerializationGradlePlugin").get())
     api(libs.findLibrary("androidToolsBuildGradle").get())
     api(libs.findLibrary("hiltGradlePlugin").get())
 }

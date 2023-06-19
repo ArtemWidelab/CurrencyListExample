@@ -22,13 +22,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
     buildFeatures {
         compose true
     }
@@ -55,7 +48,9 @@ dependencies {
     implementation libs.composeMaterial3
     implementation(project(":android-initializable"))
     implementation(project(":logger"))
+    implementation(project(":app-network"))
     implementation(project(":currency-persistence"))
+    implementation(project(":currency-api"))
 
     debugImplementation libs.composeUiToolingDebug
     debugImplementation libs.composeUiTestManifestDebug
