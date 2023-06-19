@@ -9,7 +9,7 @@ import ua.widelab.currency.api.CurrencyApiThrowable
 data class EndpointResult<T>(
     val data: T?,
     val isLoading: Boolean,
-    val error: CurrencyApiThrowable?
+    val error: Throwable?
 )
 
 sealed class RequestState {

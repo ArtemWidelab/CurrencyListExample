@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":currency-persistence"))
     implementation(project(":currency-api"))
     implementation(project(":currency-repo"))
+    implementation(project(":currency-compose"))
 
     debugImplementation libs.composeUiToolingDebug
     debugImplementation libs.composeUiTestManifestDebug

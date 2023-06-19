@@ -1,0 +1,9 @@
+<resources>
+    <string name="updated_today">Updated Today</string>
+    <string name="updating">Updating</string>
+    <string name="last_updated">Last updated %s</string>
+    <string name="fetch_exchange_rate_error">Error during fetching</string>
+    <string name="currency_list_title">Currency pairs</string>
+    <string name="new_pair_block_title">New Pair</string>
+
+</resources>

@@ -10,6 +10,9 @@ dataStore = { strictly = "1.0.0" }
 androidCore = { module = "androidx.core:core-ktx", version.strictly = "1.10.1" }
 kotlinBom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 androidLifecycle = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidLifecycle" }
+androidViewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidLifecycle" }
+androidComposeViewModel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidLifecycle" }
+androidLifecycleCompose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidLifecycle" }
 composeBom = { module = "androidx.compose:compose-bom", version.strictly = "2022.10.00" }
 composeActivity = { module = "androidx.activity:activity-compose", version.strictly = "1.7.2" }
 composeUi = { module = "androidx.compose.ui:ui" }
@@ -24,6 +27,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.strictly = "2.9
 retrofitKotlinxSerialization = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.strictly = "1.0.0" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.strictly = "1.5.1" }
 dataStorePreferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore" }
+immutableCollections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.strictly = "0.3.5" }
 
 composeUiToolingDebug = { module = "androidx.compose.ui:ui-tooling" }
 composeUiTestManifestDebug = { module = "androidx.compose.ui:ui-test-manifest" }
@@ -41,6 +45,7 @@ hiltGradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", ve
 
 hiltKapt = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 roomCompilerKapt = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidLifecycleCompilerKapt = { module = "androidx.lifecycle:lifecycle-compiler", version.ref = "androidLifecycle" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.strictly = "8.0.2" }

@@ -12,5 +12,6 @@ interface CurrencyRepo {
     fun getCurrencyPairsWithRates(): Flow<List<EndpointResult<ExchangeWithCurrency>>>
     suspend fun addCurrencyPair(from: Currency, to: Currency): Result<Unit, Throwable>
     suspend fun deleteCurrencyPair(currencyPair: CurrencyPair): Result<Unit, Throwable>
+    suspend fun addDefaultCurrencyPairs()
 }
 

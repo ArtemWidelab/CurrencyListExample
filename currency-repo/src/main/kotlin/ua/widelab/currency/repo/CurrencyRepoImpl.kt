@@ -2,11 +2,15 @@ package ua.widelab.currency.repo
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.isSuccess
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
@@ -21,6 +25,7 @@ import ua.widelab.currency.entities.models.CurrencyPair
 import ua.widelab.currency.entities.models.Exchange
 import ua.widelab.currency.entities.models.ExchangeWithCurrency
 import ua.widelab.currency.persistence.CurrencyPersistenceDataSource
+import ua.widelab.currency.persistence.models.entities.CurrencyID
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -36,6 +41,31 @@ internal class CurrencyRepoImpl @Inject constructor(
     companion object {
         val DEFAULT_AMOUNT: BigDecimal = BigDecimal.ONE
         val LAST_CURRENCIES_REQUEST = longPreferencesKey("last_currencies_request")
+        val CURRENCY_PAIRS_DATA_INITIATED = booleanPreferencesKey("currency_pairs_data_initiated")
+    }
+
+    override suspend fun addDefaultCurrencyPairs() {
+        dataStore.data
+            .mapLatest { it[CURRENCY_PAIRS_DATA_INITIATED] ?: false }
+            .filter { !it }
+            .flatMapLatest { persistenceDataSource.getCurrenciesList() }
+            .mapLatest {
+                listOfNotNull(
+                    it.find("GBP"),
+                    it.find("USD"),
+                    it.find("EUR"),
+                    it.find("UAH")
+                )
+            }
+            .filter { it.size > 1 }
+            .collectLatest { list ->
+                list.drop(1).forEach {
+                    addCurrencyPair(list.first(), it)
+                }
+                dataStore.edit {
+                    it[CURRENCY_PAIRS_DATA_INITIATED] = true
+                }
+            }
     }
 
     override fun getCurrencies(): Flow<EndpointResult<List<Currency>>> {
@@ -64,6 +94,10 @@ internal class CurrencyRepoImpl @Inject constructor(
         }.get()
     }
 
+    private fun List<Currency>.find(id: CurrencyID): Currency? {
+        return this.firstOrNull { it.shortName == id }
+    }
+
     override fun getCurrencyPairsWithRates(): Flow<List<EndpointResult<ExchangeWithCurrency>>> {
         return persistenceDataSource
             .getCurrencyPairs()
@@ -89,8 +123,9 @@ internal class CurrencyRepoImpl @Inject constructor(
                         accumulator.add(value)
                         accumulator
                     }
-                    .mapLatest { it.getList() }
             }
+            .debounce(100)
+            .mapLatest { it.getList() }
     }
 
     private fun getRates(

@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class CurrencyRepoModule {
+internal abstract class CurrencyRepoModule {
     companion object {
 
         @Provides
