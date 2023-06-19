@@ -119,7 +119,7 @@ internal class CurrencyRepoImpl @Inject constructor(
                                 )
                             }
                     }
-                    .runningFold(CurrencyPairsListAccumulatorWrapper()) { accumulator, value ->
+                    .runningFold(CurrencyPairsListAccumulatorWrapper(it)) { accumulator, value ->
                         accumulator.add(value)
                         accumulator
                     }
@@ -186,8 +186,15 @@ private data class CurrencyPairWrapper(
     val endpointResult: EndpointResult<ExchangeWithCurrency>
 )
 
-private class CurrencyPairsListAccumulatorWrapper {
+private class CurrencyPairsListAccumulatorWrapper(currencyPairs: List<CurrencyPair>) {
+
     private val data = mutableMapOf<CurrencyPair, EndpointResult<ExchangeWithCurrency>>()
+
+    init {
+        currencyPairs.forEach {
+            data[it] = EndpointResult(null, true, null)
+        }
+    }
 
     fun add(currencyPairWrapper: CurrencyPairWrapper) {
         data[currencyPairWrapper.currencyPair] = currencyPairWrapper.endpointResult
