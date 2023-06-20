@@ -9,16 +9,14 @@ import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.isSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.runningFold
 import ua.widelab.currency.api.CurrencyApiDataSource
 import ua.widelab.currency.entities.models.Currency
 import ua.widelab.currency.entities.models.CurrencyPair
@@ -102,30 +100,23 @@ internal class CurrencyRepoImpl @Inject constructor(
         return persistenceDataSource
             .getCurrencyPairs()
             .flatMapLatest {
-                flowOf(*it.toTypedArray())
-                    .flatMapMerge { currencyPair ->
-                        getRates(currencyPair)
-                            .convert {
-                                ExchangeWithCurrency(
-                                    exchange = it,
-                                    toCurrency = currencyPair.toCurrency,
-                                    fromCurrency = currencyPair.fromCurrency
-                                )
-                            }
-                            .mapLatest {
-                                CurrencyPairWrapper(
-                                    currencyPair = currencyPair,
-                                    endpointResult = it
-                                )
+                combine(
+                    it.map {
+                        flowOf(it)
+                            .flatMapLatest { currencyPair ->
+                                getRates(currencyPair).convert {
+                                    ExchangeWithCurrency(
+                                        exchange = it,
+                                        toCurrency = currencyPair.toCurrency,
+                                        fromCurrency = currencyPair.fromCurrency
+                                    )
+                                }
                             }
                     }
-                    .runningFold(CurrencyPairsListAccumulatorWrapper(it)) { accumulator, value ->
-                        accumulator.add(value)
-                        accumulator
-                    }
+                ) {
+                    it.toList()
+                }
             }
-            .debounce(100)
-            .mapLatest { it.getList() }
     }
 
     private fun getRates(
@@ -185,22 +176,3 @@ private data class CurrencyPairWrapper(
     val currencyPair: CurrencyPair,
     val endpointResult: EndpointResult<ExchangeWithCurrency>
 )
-
-private class CurrencyPairsListAccumulatorWrapper(currencyPairs: List<CurrencyPair>) {
-
-    private val data = mutableMapOf<CurrencyPair, EndpointResult<ExchangeWithCurrency>>()
-
-    init {
-        currencyPairs.forEach {
-            data[it] = EndpointResult(null, true, null)
-        }
-    }
-
-    fun add(currencyPairWrapper: CurrencyPairWrapper) {
-        data[currencyPairWrapper.currencyPair] = currencyPairWrapper.endpointResult
-    }
-
-    fun getList(): List<EndpointResult<ExchangeWithCurrency>> {
-        return data.values.toList()
-    }
-}
