@@ -2,6 +2,7 @@
 
 package ua.widelab.currency.presentation.compose
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -31,12 +33,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
@@ -46,12 +50,13 @@ import ua.widelab.compose.components.SimpleAppBar
 import ua.widelab.compose.components.SimpleAppBarNav
 import ua.widelab.currency.compose.R
 import ua.widelab.currency.presentation.CurrencyListViewModel
+import ua.widelab.currency.presentation.CurrencyListViewModel.State.Companion.isBlockingError
 import ua.widelab.currency.presentation.CurrencyListViewModel.State.Companion.isBlockingLoading
 import ua.widelab.currency.presentation.models.Currency
 import ua.widelab.currency.presentation.models.ExchangeWithCurrency
 import java.time.LocalDate
 
-@Composable()
+@Composable
 fun CurrencyListScreen(
     viewModel: CurrencyListViewModel = viewModel()
 ) {
@@ -63,8 +68,24 @@ fun CurrencyListScreen(
         viewModel::setNewPairCurrency,
         viewModel::dismissCurrencySelection,
         viewModel::selectNewPairFrom,
-        viewModel::selectNewPairTo
+        viewModel::selectNewPairTo,
+        viewModel::load
     )
+
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = viewModel.actionsFlow) {
+        viewModel.actionsFlow.collect {
+            val message = when (it) {
+                is CurrencyListViewModel.Action.ShowError -> it.throwable.message
+                    ?: context.getString(R.string.unknown_error)
+
+                CurrencyListViewModel.Action.ShowNoNetworkError -> context.getString(R.string.no_internet_connection)
+                CurrencyListViewModel.Action.ShowAlreadyAddedError -> context.getString(R.string.such_pair_already_exists)
+            }
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
+    }
 }
 
 @Composable
@@ -76,9 +97,17 @@ fun CurrencyListScreen(
     dismissCurrencySelection: () -> Unit,
     selectNewPairFrom: () -> Unit,
     selectNewPairTo: () -> Unit,
+    reload: () -> Unit
 ) {
     if (state.isBlockingLoading) {
         CurrencyListLoading()
+        return
+    }
+    if (state.isBlockingError) {
+        CurrencyListError(
+            state = state,
+            reload = reload
+        )
         return
     }
     val lazyListState = rememberLazyListState()
@@ -290,5 +319,20 @@ fun CurrencyListLoading() {
         CircularProgressIndicator(
             modifier = Modifier.size(50.dp)
         )
+    }
+}
+
+@Composable
+fun CurrencyListError(
+    state: CurrencyListViewModel.State,
+    reload: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column {
+            Text(text = "Oops! " + state.loadingError?.message)
+            Button(onClick = reload) {
+                Text(text = stringResource(id = R.string.error_button_title))
+            }
+        }
     }
 }
