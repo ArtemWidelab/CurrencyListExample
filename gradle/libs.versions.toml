@@ -1,6 +1,6 @@
 [versions]
-kotlin = { strictly = "1.8.0" }
-composeKotlinCompiler = "1.4.0"
+kotlin = { strictly = "1.8.21" }
+composeKotlinCompiler = "1.4.7"
 androidLifecycle = { strictly = "2.6.1" }
 hilt = { strictly = "2.44" }
 room = { strictly = "2.5.1" }
@@ -52,3 +52,4 @@ androidApplication = { id = "com.android.application", version.strictly = "8.0.2
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
