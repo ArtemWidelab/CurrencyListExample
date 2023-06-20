@@ -1,8 +1,10 @@
 package ua.widelab.currency.presentation.models
 
+import androidx.compose.runtime.Stable
 import java.math.BigDecimal
 import java.time.LocalDate
 
+@Stable
 data class Exchange(
     val amount: BigDecimal,
     val rate: BigDecimal,

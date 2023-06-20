@@ -1,5 +1,8 @@
 package ua.widelab.currency.presentation.models
 
+import androidx.compose.runtime.Stable
+
+@Stable
 data class ExchangeWithCurrency(
     val exchange: Exchange?,
     val toCurrency: Currency,

@@ -1,5 +1,6 @@
 package ua.widelab.currency.presentation
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.result.onFailure
@@ -187,6 +188,7 @@ class CurrencyListViewModel @Inject constructor(
         }
     }
 
+    @Stable
     data class State(
         val currencies: ImmutableList<Currency> = persistentListOf(),
         val exchangeWithCurrencies: ImmutableList<ExchangeWithCurrency> = persistentListOf(),
@@ -203,11 +205,13 @@ class CurrencyListViewModel @Inject constructor(
         }
     }
 
+    @Stable
     data class NewPairState(
         val from: Currency,
         val to: Currency
     )
 
+    @Stable
     enum class SelectCurrencyState {
         HIDDEN,
         FROM,
